@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import io
 from collections import Counter
+from typing import Any
 
 
 def sentiment_distribution(labels: list[str]):
@@ -44,7 +45,7 @@ def dataset_statistics_chart(stats: dict[str, int]):
     )
 
 
-def embedding_projection(embeddings, labels: list[str] | None = None) -> go.Figure:
+def embedding_projection(embeddings, labels: list[str] | None = None) -> Any:
     """Project embeddings to two dimensions using PCA."""
 
     import numpy as np
@@ -67,6 +68,7 @@ def confusion_matrix_png(matrix, labels: list[str]) -> bytes:
     """Render a confusion matrix as PNG bytes."""
 
     import matplotlib.pyplot as plt
+    import numpy as np
 
     fig, ax = plt.subplots(figsize=(5, 4))
     image = ax.imshow(matrix, cmap="Blues")

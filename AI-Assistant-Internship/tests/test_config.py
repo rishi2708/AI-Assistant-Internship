@@ -1,7 +1,9 @@
+import config as config_module
 from config import AppConfig, ensure_directories
 
 
 def test_config_from_env_has_defaults(monkeypatch):
+    monkeypatch.setattr(config_module, "load_dotenv", lambda *args, **kwargs: False)
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
     config = AppConfig.from_env()
 

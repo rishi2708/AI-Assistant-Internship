@@ -8,7 +8,7 @@ from collections.abc import Iterator
 import requests
 
 from chatbot.memory import ConversationMemory
-from config import AppConfig, DEFAULT_SYSTEM_PROMPT, GEMINI_MODEL_FALLBACKS
+from config import DEFAULT_SYSTEM_PROMPT, GEMINI_MODEL_FALLBACKS, AppConfig
 
 logger = logging.getLogger(__name__)
 

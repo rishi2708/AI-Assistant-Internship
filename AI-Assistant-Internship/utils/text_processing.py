@@ -6,7 +6,6 @@ import re
 from dataclasses import dataclass
 from typing import Iterable
 
-import nltk
 from langchain_core.documents import Document
 
 
@@ -30,8 +29,10 @@ def sentence_tokenize(text: str) -> list[str]:
     """Tokenize text into sentences with a safe fallback."""
 
     try:
+        import nltk
+
         return nltk.sent_tokenize(text)
-    except LookupError:
+    except Exception:
         return re.split(r"(?<=[.!?])\s+", text)
 
 

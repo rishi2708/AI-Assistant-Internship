@@ -8,7 +8,7 @@ from chatbot.base_chatbot import GeminiChatbot
 from chatbot.knowledge_base import DynamicKnowledgeBase
 from chatbot.knowledge_updater import KnowledgeBaseUpdater
 from chatbot.memory import ConversationMemory
-from config import AppConfig, BASE_DIR, VECTOR_DB_DIR, ensure_directories
+from config import BASE_DIR, VECTOR_DB_DIR, AppConfig, ensure_directories
 
 
 def main() -> None:

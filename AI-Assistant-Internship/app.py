@@ -11,11 +11,11 @@ from chatbot.memory import ConversationMemory
 from chatbot.sentiment import SentimentAnalyzer
 from config import (
     ARXIV_DATA_DIR,
-    AppConfig,
     DEFAULT_SYSTEM_PROMPT,
     SCIENTIFIC_SYSTEM_PROMPT,
     UPLOAD_DIR,
     VECTOR_DB_DIR,
+    AppConfig,
     ensure_directories,
 )
 from utils.logging import configure_logging

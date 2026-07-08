@@ -11,7 +11,7 @@ import pytesseract
 import requests
 from PIL import Image
 
-from config import AppConfig, GEMINI_MODEL_FALLBACKS
+from config import GEMINI_MODEL_FALLBACKS, AppConfig
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +39,6 @@ class GeminiVisionAssistant:
         if not self.config.has_gemini_key:
             return "Gemini API key is not configured. Add it to `.env` as GEMINI_API_KEY."
 
-        image = Image.open(image_path)
         ocr_text = self.extract_ocr(image_path)
         full_prompt = (
             f"{prompt}\n\n"

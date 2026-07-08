@@ -9,7 +9,7 @@ from langchain_core.documents import Document
 
 from chatbot.base_chatbot import GeminiChatbot
 from chatbot.rag import RAGPipeline
-from config import AppConfig, UPLOAD_DIR, VECTOR_DB_DIR
+from config import UPLOAD_DIR, VECTOR_DB_DIR, AppConfig
 from utils.document_loader import load_uploaded_document
 
 

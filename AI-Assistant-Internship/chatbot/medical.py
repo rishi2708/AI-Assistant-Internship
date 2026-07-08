@@ -5,7 +5,7 @@ from __future__ import annotations
 from chatbot.base_chatbot import GeminiChatbot
 from chatbot.medical_entities import MedicalEntityRecognizer
 from chatbot.rag import RAGPipeline
-from config import AppConfig, MEDICAL_DATA_DIR, MEDICAL_DISCLAIMER, VECTOR_DB_DIR
+from config import MEDICAL_DATA_DIR, MEDICAL_DISCLAIMER, VECTOR_DB_DIR, AppConfig
 from utils.document_loader import load_medquad_documents
 
 
