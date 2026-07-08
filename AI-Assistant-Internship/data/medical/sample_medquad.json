@@ -1,0 +1,14 @@
+[
+  {
+    "question": "What is hypertension?",
+    "answer": "Hypertension is persistently high blood pressure. It can increase the risk of heart disease, stroke, kidney disease, and other complications. Diagnosis and treatment should be guided by a qualified clinician.",
+    "focus_area": "Hypertension",
+    "source": "sample_medquad"
+  },
+  {
+    "question": "What are common symptoms of diabetes?",
+    "answer": "Common symptoms of diabetes can include increased thirst, frequent urination, fatigue, blurred vision, slow-healing wounds, and unexplained weight changes. Some people may have mild or no symptoms.",
+    "focus_area": "Diabetes",
+    "source": "sample_medquad"
+  }
+]

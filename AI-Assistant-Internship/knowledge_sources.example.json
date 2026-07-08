@@ -1,0 +1,16 @@
+{
+  "sources": [
+    {
+      "path": "uploads",
+      "enabled": true
+    },
+    {
+      "path": "data/medical",
+      "enabled": true
+    },
+    {
+      "path": "data/arxiv",
+      "enabled": true
+    }
+  ]
+}

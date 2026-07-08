@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Secrets
+.env
+*.key
+
+# Runtime data
+uploads/*
+!uploads/.gitkeep
+vector_db/*
+!vector_db/.gitkeep
+models/*
+!models/.gitkeep
+reports/generated/*
+streamlit*.log
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Notebooks
+.ipynb_checkpoints/

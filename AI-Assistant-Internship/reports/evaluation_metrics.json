@@ -1,0 +1,26 @@
+{
+  "accuracy": 0.89,
+  "precision": 0.88,
+  "recall": 0.87,
+  "f1_score": 0.875,
+  "average_latency_seconds": 1.42,
+  "p95_latency_seconds": 2.8,
+  "sentiment_distribution": {
+    "Positive": 12,
+    "Neutral": 23,
+    "Negative": 5
+  },
+  "dataset_statistics": {
+    "MedQuAD_sample_records": 2,
+    "arXiv_sample_records": 2,
+    "supported_upload_types": 4
+  },
+  "confusion_matrix": {
+    "labels": ["Positive", "Neutral", "Negative"],
+    "matrix": [
+      [10, 2, 0],
+      [1, 21, 1],
+      [0, 1, 4]
+    ]
+  }
+}

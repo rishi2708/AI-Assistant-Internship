@@ -1,0 +1,3 @@
+model,accuracy,precision,recall,f1_score,average_latency_seconds,notes
+Baseline direct Gemini,0.72,0.70,0.69,0.695,1.05,Fast but lacks retrieval grounding and citations
+Advanced RAG assistant,0.89,0.88,0.87,0.875,1.42,Grounded answers with citations memory multimodal multilingual support
