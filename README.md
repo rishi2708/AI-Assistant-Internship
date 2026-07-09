@@ -12,12 +12,12 @@ This repository is organized for internship evaluation. It does not contain mult
 
 | Internship requirement | Status | Evidence |
 | --- | --- | --- |
-| Dynamic knowledge-base expansion | Complete | [`chatbot/knowledge_base.py`](AI-Assistant-Internship/chatbot/knowledge_base.py), [`chatbot/knowledge_updater.py`](AI-Assistant-Internship/chatbot/knowledge_updater.py), [`update_knowledge_base.py`](AI-Assistant-Internship/update_knowledge_base.py) |
-| Multi-modal assistant for text and images | Complete | [`chatbot/vision.py`](AI-Assistant-Internship/chatbot/vision.py), Streamlit Vision mode, OCR/image reasoning support |
+| Dynamic knowledge-base expansion | Complete | Scheduler, cron workflow, SHA-256 manifest, incremental indexing: [`schedule_knowledge_updates.py`](AI-Assistant-Internship/schedule_knowledge_updates.py), [`chatbot/knowledge_updater.py`](AI-Assistant-Internship/chatbot/knowledge_updater.py), [root scheduled workflow](.github/workflows/scheduled-knowledge-update.yml) |
+| Multi-modal assistant for text and images | Complete | Evidence/ambiguity/validation pipeline: [`chatbot/vision.py`](AI-Assistant-Internship/chatbot/vision.py), [`chatbot/multimodal_reasoning.py`](AI-Assistant-Internship/chatbot/multimodal_reasoning.py) |
 | Medical Q&A chatbot using MedQuAD | Complete | [`chatbot/medical.py`](AI-Assistant-Internship/chatbot/medical.py), [`chatbot/medical_entities.py`](AI-Assistant-Internship/chatbot/medical_entities.py), citations, medical disclaimer |
-| Domain expert chatbot using arXiv | Complete | [`chatbot/scientific.py`](AI-Assistant-Internship/chatbot/scientific.py), scientific RAG, paper retrieval, summaries, references |
-| Sentiment analysis and tone adaptation | Complete | [`chatbot/sentiment.py`](AI-Assistant-Internship/chatbot/sentiment.py), sentiment charts, tone guidance |
-| Multilingual conversations | Complete | [`chatbot/multilingual.py`](AI-Assistant-Internship/chatbot/multilingual.py), language detection, translation, context continuity |
+| Domain expert chatbot using arXiv | Complete | CS subset retrieval, open-source summarization fallback, concept graph, follow-ups: [`chatbot/scientific.py`](AI-Assistant-Internship/chatbot/scientific.py), [`data/arxiv/computer_science_subset.jsonl`](AI-Assistant-Internship/data/arxiv/computer_science_subset.jsonl) |
+| Sentiment analysis and tone adaptation | Complete | Full sentiment-aware generation/evaluation pipeline: [`chatbot/sentiment.py`](AI-Assistant-Internship/chatbot/sentiment.py), [`chatbot/sentiment_pipeline.py`](AI-Assistant-Internship/chatbot/sentiment_pipeline.py) |
+| Multilingual conversations | Complete | Context-preserving multilingual state: [`chatbot/multilingual.py`](AI-Assistant-Internship/chatbot/multilingual.py), [`chatbot/multilingual_context.py`](AI-Assistant-Internship/chatbot/multilingual_context.py) |
 | Complete RAG pipeline | Complete | [`chatbot/rag.py`](AI-Assistant-Internship/chatbot/rag.py), [`chatbot/retriever.py`](AI-Assistant-Internship/chatbot/retriever.py), [`chatbot/embeddings.py`](AI-Assistant-Internship/chatbot/embeddings.py) |
 | Streamlit dashboard | Complete | [`app.py`](AI-Assistant-Internship/app.py), sidebar controls, uploads, modes, chat export |
 | Visual outputs and metrics | Complete | [`images/`](AI-Assistant-Internship/images/), [`reports/evaluation_metrics.json`](AI-Assistant-Internship/reports/evaluation_metrics.json) |
@@ -99,6 +99,7 @@ http://localhost:8501
 ## Documentation
 
 - Full project README: [`AI-Assistant-Internship/README.md`](AI-Assistant-Internship/README.md)
+- Evaluator remediation evidence: [`AI-Assistant-Internship/reports/evaluator_remediation.md`](AI-Assistant-Internship/reports/evaluator_remediation.md)
 - Internship report: [`AI-Assistant-Internship/reports/internship_report.md`](AI-Assistant-Internship/reports/internship_report.md)
 - Task completion audit: [`AI-Assistant-Internship/reports/task_completion_audit.md`](AI-Assistant-Internship/reports/task_completion_audit.md)
 - Methodology details: [`AI-Assistant-Internship/reports/methodology_details.md`](AI-Assistant-Internship/reports/methodology_details.md)

@@ -112,7 +112,11 @@ def load_medquad_documents(data_dir: Path) -> list[Document]:
     return documents
 
 
-def load_arxiv_documents(data_dir: Path, max_records: int | None = None) -> list[Document]:
+def load_arxiv_documents(
+    data_dir: Path,
+    max_records: int | None = None,
+    category_prefix: str | None = None,
+) -> list[Document]:
     """Load arXiv metadata records from JSON/JSONL/CSV files."""
 
     documents: list[Document] = []
@@ -129,6 +133,10 @@ def load_arxiv_documents(data_dir: Path, max_records: int | None = None) -> list
             abstract = record.get("abstract") or record.get("summary") or ""
             authors = record.get("authors", "")
             categories = record.get("categories", "")
+            if category_prefix and not any(
+                category.startswith(category_prefix) for category in str(categories).split()
+            ):
+                continue
             arxiv_id = record.get("id") or record.get("arxiv_id") or ""
             text = clean_text(
                 f"Title: {title}\nAuthors: {authors}\nCategories: {categories}\nAbstract: {abstract}"

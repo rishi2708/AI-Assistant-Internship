@@ -88,6 +88,62 @@ class ScientificPaperToolkit:
         concepts = self.extract_concepts(text, limit=limit)
         return list(zip(concepts, concepts[1:]))
 
+    def concept_mermaid(self, text: str, limit: int = 8) -> str:
+        """Return a Mermaid concept graph for scientific concept visualization."""
+
+        edges = self.concept_edges(text, limit=limit)
+        if not edges:
+            return "graph TD\n    A[No concepts found]"
+        lines = ["graph TD"]
+        for left, right in edges:
+            lines.append(f"    {self._node(left)}[{left}] --> {self._node(right)}[{right}]")
+        return "\n".join(lines)
+
+    def follow_up_questions(self, query: str, results: list[PaperSearchResult]) -> list[str]:
+        """Generate follow-up questions grounded in retrieved CS papers."""
+
+        concepts = []
+        for result in results:
+            concepts.extend(result.concepts[:3])
+        unique = list(dict.fromkeys(concepts))
+        if not unique:
+            unique = list(self._terms(query))[:3]
+        return [f"How does {concept} affect the method or result?" for concept in unique[:3]]
+
+    def open_source_summary(self, text: str, model_name: str = "sshleifer/distilbart-cnn-12-6") -> str:
+        """Summarize with an open-source Transformers model when available.
+
+        The method falls back to deterministic extractive summarization so the
+        project remains reproducible in CI and without downloading large models.
+        """
+
+        try:
+            from transformers import pipeline
+
+            summarizer = pipeline("summarization", model=model_name)
+            output = summarizer(text[:3000], max_length=140, min_length=35, do_sample=False)
+            return str(output[0]["summary_text"])
+        except Exception:
+            return self.summarize(text, max_sentences=4)
+
+    def build_expert_context(self, query: str, documents: list[Document], limit: int = 3) -> dict[str, object]:
+        """Build CS-domain expert context for retrieval, summarization, and follow-up."""
+
+        cs_documents = [
+            document
+            for document in documents
+            if any(category.startswith("cs.") for category in str(document.metadata.get("categories", "")).split())
+        ]
+        results = self.search(query, cs_documents, limit=limit)
+        joined = "\n\n".join(result.summary for result in results)
+        return {
+            "subset": "Computer Science arXiv categories (cs.*)",
+            "papers": results,
+            "open_source_summary": self.open_source_summary(joined or query),
+            "concept_graph": self.concept_mermaid(joined or query),
+            "follow_up_questions": self.follow_up_questions(query, results),
+        }
+
     def _terms(self, text: str) -> set[str]:
         """Normalize searchable terms."""
 
@@ -96,6 +152,12 @@ class ScientificPaperToolkit:
             for term in re.findall(r"[A-Za-z][A-Za-z0-9-]{2,}", text.lower())
             if term not in self.STOPWORDS
         }
+
+    @staticmethod
+    def _node(text: str) -> str:
+        """Create a Mermaid-safe node id."""
+
+        return re.sub(r"[^A-Za-z0-9_]", "_", text.title())
 
     @staticmethod
     def _extract_title(text: str) -> str:

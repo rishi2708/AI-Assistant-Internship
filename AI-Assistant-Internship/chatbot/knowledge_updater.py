@@ -3,11 +3,16 @@
 from __future__ import annotations
 
 import json
+import time
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from hashlib import sha256
 from pathlib import Path
+from typing import TYPE_CHECKING
 
-from chatbot.knowledge_base import DynamicKnowledgeBase
+if TYPE_CHECKING:
+    from chatbot.knowledge_base import DynamicKnowledgeBase
 
 
 @dataclass(frozen=True)
@@ -25,7 +30,7 @@ class KnowledgeBaseUpdater:
 
     def __init__(
         self,
-        knowledge_base: DynamicKnowledgeBase,
+        knowledge_base: "DynamicKnowledgeBase",
         sources_file: Path,
         state_file: Path,
     ) -> None:
@@ -56,14 +61,40 @@ class KnowledgeBaseUpdater:
         for path in changed_files:
             try:
                 chunks_added += self.knowledge_base.add_file(path)
-                state[str(path.resolve())] = path.stat().st_mtime
+                state[str(path.resolve())] = self._fingerprint(path)
                 ingested.append(str(path))
             except Exception as exc:  # pragma: no cover - file dependent
                 state[f"error:{path.resolve()}"] = str(exc)
 
         state["_last_run_utc"] = datetime.now(timezone.utc).isoformat()
+        state["_last_files_ingested"] = ingested
+        state["_last_chunks_added"] = chunks_added
         self._save_state(state)
         return {"files_ingested": ingested, "chunks_added": chunks_added, "last_run_utc": state["_last_run_utc"]}
+
+    def run_periodically(
+        self,
+        interval_minutes: int = 60,
+        stop_after_runs: int | None = None,
+        on_result: Callable[[dict[str, object]], None] | None = None,
+    ) -> None:
+        """Run the incremental updater on a fixed interval.
+
+        This method is intentionally simple so it works in local scripts, CI, or a
+        long-running server process. Production deployments can call the same
+        `update` method from cron, Windows Task Scheduler, GitHub Actions, or a
+        container scheduler.
+        """
+
+        runs = 0
+        while stop_after_runs is None or runs < stop_after_runs:
+            result = self.update()
+            if on_result:
+                on_result(result)
+            runs += 1
+            if stop_after_runs is not None and runs >= stop_after_runs:
+                break
+            time.sleep(max(interval_minutes, 1) * 60)
 
     def _changed_files(self, sources: list[KnowledgeSource], state: dict[str, object]) -> list[Path]:
         """Return supported files that are new or changed."""
@@ -78,10 +109,18 @@ class KnowledgeBaseUpdater:
                 if candidate.suffix.lower() not in self.SUPPORTED_EXTENSIONS:
                     continue
                 key = str(candidate.resolve())
-                modified = candidate.stat().st_mtime
-                if state.get(key) != modified:
+                fingerprint = self._fingerprint(candidate)
+                if state.get(key) != fingerprint:
                     changed.append(candidate)
         return changed
+
+    @staticmethod
+    def _fingerprint(path: Path) -> dict[str, object]:
+        """Return a stable incremental-index fingerprint for a source file."""
+
+        stat = path.stat()
+        digest = sha256(path.read_bytes()).hexdigest()
+        return {"sha256": digest, "size": stat.st_size, "modified": stat.st_mtime}
 
     def _load_state(self) -> dict[str, object]:
         """Load update state."""

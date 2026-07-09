@@ -21,12 +21,12 @@ def internship_task_statuses() -> list[TaskStatus]:
         TaskStatus(
             "Dynamic knowledge-base expansion",
             "Complete",
-            "Upload ingestion, persisted vector index, reload support, and configured source updater.",
+            "Automated scheduled updater, GitHub Actions cron, SHA-256 manifest, incremental changed-file detection, FAISS persistence, and reload support.",
         ),
         TaskStatus(
             "Multi-modal text and image assistant",
             "Complete",
-            "Vision mode supports image upload, OCR context, text prompt, evidence-first reasoning, and memory.",
+            "Vision mode combines image observations, OCR, text prompts, conversation memory, ambiguity detection, answer validation, and evidence-based final decisions.",
         ),
         TaskStatus(
             "Medical Q&A chatbot using MedQuAD",
@@ -36,16 +36,16 @@ def internship_task_statuses() -> list[TaskStatus]:
         TaskStatus(
             "Domain expert chatbot using arXiv",
             "Complete",
-            "arXiv loader, scientific RAG, paper search, summaries, references, and concept extraction.",
+            "Computer Science arXiv subset filtering, scientific RAG, advanced paper search, open-source summarization fallback, concept graph generation, references, and follow-up questions.",
         ),
         TaskStatus(
             "Sentiment analysis integration",
             "Complete",
-            "Positive/negative/neutral detection, tone adaptation, metrics tracking, and sentiment graphs.",
+            "Complete sentiment-aware pipeline: emotion detection, adaptive prompt generation, response post-processing, tone-alignment evaluation, metrics tracking, and sentiment graphs.",
         ),
         TaskStatus(
             "Multilingual conversations",
             "Complete",
-            "Language detection, mixed-language segment detection, translation workflow, and context preservation.",
+            "Automatic language identification, mixed-language segment detection, English/Hindi/Bengali/Spanish translation workflow, context preservation after language switching, and cross-lingual reasoning prompts.",
         ),
     ]

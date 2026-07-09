@@ -1,0 +1,32 @@
+name: Scheduled Knowledge Expansion
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+
+jobs:
+  update-knowledge-base:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: AI-Assistant-Internship
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install runtime
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run one incremental indexing pass
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python schedule_knowledge_updates.py --once

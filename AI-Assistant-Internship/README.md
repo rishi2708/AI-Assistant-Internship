@@ -9,10 +9,10 @@ This repository implements one unified AI Assistant rather than separate demos. 
 - General Gemini chatbot with streaming-ready backend, conversation history, system prompt, temperature control, and clear chat.
 - Medical chatbot powered by MedQuAD-style records, FAISS retrieval, citations, top-k control, and a medical disclaimer.
 - Scientific/domain expert chatbot powered by arXiv metadata for paper retrieval, summarization, context generation, and references.
-- Dynamic knowledge base where uploaded PDF, TXT, MD, and DOCX files are extracted, chunked, embedded, indexed in FAISS, persisted, and reloaded.
-- Gemini Vision for image reasoning, OCR-assisted analysis, and mixed image plus text prompts.
-- Multilingual flow with language detection, translation to English, generation/retrieval, and translation back to English, Hindi, Bengali, or Spanish.
-- Sentiment analysis with tone adaptation and sentiment distribution visualization.
+- Dynamic knowledge base where uploaded PDF, TXT, MD, and DOCX files are extracted, chunked, embedded, indexed in FAISS, persisted, reloaded, and periodically updated through an incremental scheduled pipeline.
+- Gemini Vision with evidence-based multimodal reasoning, OCR-assisted analysis, ambiguity detection, validation, and mixed image plus text context.
+- Multilingual flow with language detection, translation to English, generation/retrieval, translation back to English, Hindi, Bengali, or Spanish, and preserved context after language switches.
+- Sentiment analysis with full response adaptation, tone-alignment evaluation, and sentiment distribution visualization.
 - Persistent and windowed memory with Markdown chat export.
 - Analytics for dataset statistics, latency, sentiment, confusion matrix utilities, and embedding visualization.
 - Internship task audit with explicit evidence for each required task card.
@@ -47,6 +47,7 @@ flowchart TD
 ```text
 AI-Assistant-Internship/
 |-- app.py
+|-- schedule_knowledge_updates.py
 |-- config.py
 |-- requirements.txt
 |-- chatbot/
@@ -104,6 +105,16 @@ GEMINI_API_KEY=your_google_gemini_api_key_here
 ```bash
 .\.venv\Scripts\python.exe -m streamlit run app.py
 ```
+
+## Evaluator Remediation Evidence
+
+The repository includes an explicit remediation report at [`reports/evaluator_remediation.md`](reports/evaluator_remediation.md). It documents:
+
+- automated periodic knowledge expansion with incremental SHA-256 indexing;
+- multimodal evidence extraction, ambiguity handling, response validation, and decision output;
+- Computer Science arXiv subset retrieval with concept graphs, follow-up questions, and open-source summarization fallback;
+- complete sentiment-aware response generation and evaluation;
+- context-preserving multilingual conversation across language switches.
 
 Open the local Streamlit URL. Use the sidebar to select the chatbot mode, upload documents, upload images, set top-k retrieval, adjust temperature, clear history, and download chat history.
 

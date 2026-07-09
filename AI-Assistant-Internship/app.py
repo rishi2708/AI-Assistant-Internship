@@ -8,7 +8,7 @@ import streamlit as st
 
 from chatbot.base_chatbot import GeminiChatbot
 from chatbot.memory import ConversationMemory
-from chatbot.sentiment import SentimentAnalyzer
+from chatbot.sentiment_pipeline import SentimentAwareResponder
 from config import (
     ARXIV_DATA_DIR,
     DEFAULT_SYSTEM_PROMPT,
@@ -34,6 +34,7 @@ def init_state() -> None:
     st.session_state.setdefault("memory", ConversationMemory(VECTOR_DB_DIR / "conversation_memory.json"))
     st.session_state.setdefault("metrics", MetricsTracker())
     st.session_state.setdefault("messages", [])
+    st.session_state.setdefault("multilingual_context", None)
 
 
 def get_chatbot(system_prompt: str, temperature: float) -> GeminiChatbot:
@@ -144,9 +145,10 @@ def answer_prompt(prompt: str, controls: dict[str, object]) -> str:
     top_k = int(controls["top_k"])
     system_prompt = str(controls["system_prompt"])
 
-    sentiment = SentimentAnalyzer().analyze(prompt)
+    sentiment_responder = SentimentAwareResponder()
+    sentiment = sentiment_responder.analyzer.analyze(prompt)
     st.session_state.metrics.add_sentiment(sentiment.label)
-    prompt_with_tone = f"{prompt}\n\nTone guidance: {sentiment.tone_instruction}"
+    prompt_with_tone = sentiment_responder.adapt_prompt(prompt, sentiment)
 
     if mode == "Medical":
         from chatbot.medical import MedicalChatbot
@@ -162,16 +164,24 @@ def answer_prompt(prompt: str, controls: dict[str, object]) -> str:
             from chatbot.scientific import ScientificPaperToolkit
             from utils.document_loader import load_arxiv_documents
 
-            papers = load_arxiv_documents(ARXIV_DATA_DIR, max_records=5000)
+            papers = load_arxiv_documents(ARXIV_DATA_DIR, max_records=5000, category_prefix="cs.")
             toolkit = ScientificPaperToolkit()
-            paper_results = toolkit.search(prompt, papers, limit=3)
+            expert_context = toolkit.build_expert_context(prompt, papers, limit=3)
+            paper_results = expert_context["papers"]
             if paper_results:
                 paper_context = "\n\n".join(
                     f"Paper: {item.title}\nSummary: {item.summary}\nReference: {item.reference}\n"
                     f"Concepts: {', '.join(item.concepts)}"
                     for item in paper_results
                 )
-                prompt_with_tone = f"{prompt_with_tone}\n\nScientific paper search context:\n{paper_context}"
+                follow_ups = "\n".join(f"- {item}" for item in expert_context["follow_up_questions"])
+                prompt_with_tone = (
+                    f"{prompt_with_tone}\n\n"
+                    "Scientific paper search context from Computer Science arXiv subset:\n"
+                    f"{paper_context}\n\n"
+                    f"Open-source model/extractive summary:\n{expert_context['open_source_summary']}\n\n"
+                    f"Suggested follow-up questions:\n{follow_ups}"
+                )
         except Exception:
             pass
         pipeline = bootstrap_scientific(chatbot)
@@ -185,20 +195,28 @@ def answer_prompt(prompt: str, controls: dict[str, object]) -> str:
         return str(kb.query(prompt_with_tone, top_k=top_k)["answer"])
 
     if mode == "Multilingual":
-        from chatbot.multilingual import MultilingualAssistant
+        from chatbot.multilingual_context import ContextPreservingMultilingualAssistant
 
         chatbot = get_chatbot(system_prompt, temperature)
-        multilingual = MultilingualAssistant()
+        if st.session_state.multilingual_context is None:
+            st.session_state.multilingual_context = ContextPreservingMultilingualAssistant()
+        multilingual = st.session_state.multilingual_context
 
         def _answer_fn(english_query: str) -> str:
-            return chatbot.generate_response(f"{english_query}\n\nTone guidance: {sentiment.tone_instruction}")
+            return chatbot.generate_response(sentiment_responder.adapt_prompt(english_query, sentiment))
 
         result = multilingual.answer(prompt, _answer_fn)
         segments = ", ".join(f"{item['language']}: {item['text']}" for item in result.language_segments)
-        return f"{result.answer}\n\nDetected language: {result.detected_language}\n\nLanguage segments: {segments}"
+        return (
+            f"{result.answer}\n\n"
+            f"Detected language: {result.detected_language}\n\n"
+            f"Language segments: {segments}\n\n"
+            f"Cross-lingual context turns: {len(multilingual.state.turns)}"
+        )
 
     chatbot = get_chatbot(system_prompt, temperature)
-    return chatbot.generate_response(prompt_with_tone, mode=mode)
+    response = sentiment_responder.generate(prompt, lambda adapted: chatbot.generate_response(adapted, mode=mode))
+    return f"{response.response}\n\nSentiment pipeline: {response.evaluation}"
 
 
 def render_chat(controls: dict[str, object]) -> None:
@@ -233,14 +251,24 @@ def render_vision(controls: dict[str, object]) -> None:
     st.image(str(path), caption=image_file.name, use_column_width=True)
     prompt = st.text_area("Image question", "Describe the image and extract important text.")
     if st.button("Analyze image", type="primary"):
+        from chatbot.multimodal_reasoning import MultimodalReasoner
         from chatbot.vision import GeminiVisionAssistant
 
         vision = GeminiVisionAssistant(st.session_state.config, float(controls["temperature"]))
         with st.session_state.metrics.track_latency():
             answer = vision.analyze_image(path, prompt)
-        st.markdown(answer)
+        ocr_text = vision.extract_ocr(path)
+        prior_context = [message["content"] for message in st.session_state.messages[-4:]]
+        reasoned = MultimodalReasoner().reason(
+            user_text=prompt,
+            generated_answer=answer,
+            image_observations=answer,
+            ocr_text=ocr_text,
+            prior_context=prior_context,
+        )
+        st.markdown(reasoned.answer)
         st.session_state.memory.add("user", f"[Image: {image_file.name}] {prompt}", "Vision")
-        st.session_state.memory.add("assistant", answer, "Vision")
+        st.session_state.memory.add("assistant", reasoned.answer, "Vision")
 
 
 def render_dashboard() -> None:
